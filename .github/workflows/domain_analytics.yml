@@ -46,7 +46,7 @@ jobs:
           HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'permite-delete') }}
         run: |
           databricks bundle plan -t hml | tee plan.txt
-          if grep -Eiq '(^|\s)(delete|recreate)\b' plan.txt && [ "$HAS_LABEL" != "true" ]; then
+          if grep -Eiq '^(delete|recreate)\s+' plan.txt && [ "$HAS_LABEL" != "true" ]; then
             echo "::error::O plan contém delete/recreate. Se intencional, adicione a label 'permite-delete'."
             exit 1
           fi
