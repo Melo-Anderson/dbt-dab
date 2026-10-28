@@ -1,0 +1,99 @@
+name: domain_analytics
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+    paths: ["bundles/domain_analytics/**", ".github/workflows/domain_analytics.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    environment: hml
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_AUTH_TYPE: oauth-m2m
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+    defaults:
+      run:
+        working-directory: bundles/domain_analytics
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: databricks/setup-cli@main
+      - run: pip install -r ../../requirements.txt
+      - name: dbt parse (sem conexão ao warehouse)
+        working-directory: bundles/domain_analytics/dbt_project
+        env:
+          DATABRICKS_HTTP_PATH: placeholder
+          DATABRICKS_TOKEN: placeholder
+          DBT_TARGET: hml
+        run: dbt deps && dbt parse --profiles-dir .
+      - run: databricks bundle validate -t hml
+      - name: Plan de HML e trava de delete
+        env:
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'permite-delete') }}
+        run: |
+          databricks bundle plan -t hml | tee plan.txt
+          if grep -Eiq '^(delete|recreate)\s+' plan.txt && [ "$HAS_LABEL" != "true" ]; then
+            echo "::error::O plan contém delete/recreate. Se intencional, adicione a label 'permite-delete'."
+            exit 1
+          fi
+
+  deploy-hml:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    environment: hml
+    concurrency:
+      group: deploy-hml
+      cancel-in-progress: false
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_AUTH_TYPE: oauth-m2m
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+    defaults:
+      run:
+        working-directory: bundles/domain_analytics
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle deploy -t hml
+      - run: databricks bundle run -t hml dbt_medallion_job
+
+  deploy-prod:
+    if: github.event_name == 'push'
+    needs: deploy-hml
+    runs-on: ubuntu-24.04
+    environment: prod   # Required Reviewers = aprovação manual
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_AUTH_TYPE: oauth-m2m
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+    defaults:
+      run:
+        working-directory: bundles/domain_analytics
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle plan -t prod
+      - run: databricks bundle deploy -t prod
