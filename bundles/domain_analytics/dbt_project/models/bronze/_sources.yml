@@ -1,0 +1,73 @@
+version: 2
+
+sources:
+  - name: raw
+    database: prod
+    schema: default
+    description: "Tabelas brutas de ingestão em prod.default lidas diretamente por todos os ambientes (Dev, HML e Prod)."
+    tables:
+      - name: affiliate_cpa_ftd
+        description: "Registros brutos de CPA & FTD de afiliados."
+        columns:
+          - name: affiliate_id
+            description: "ID do afiliado parceiro."
+          - name: player_id
+            description: "ID do jogador."
+          - name: country
+            description: "Código do país."
+          - name: clicks
+            description: "Total de cliques."
+          - name: registrations
+            description: "Total de registros."
+          - name: ftd
+            description: "First time deposits."
+          - name: cpa_value
+            description: "Valor de comissão CPA."
+          - name: _ingested_at
+            description: "Timestamp de ingestão."
+
+      - name: players
+        description: "Registros brutos de perfis de jogadores."
+        columns:
+          - name: player_id
+            description: "ID único do jogador."
+          - name: email
+            description: "E-mail do jogador."
+          - name: city
+            description: "Cidade do jogador."
+          - name: created_at
+            description: "Data/timestamp de cadastro."
+          - name: _ingested_at
+            description: "Timestamp de ingestão."
+
+      - name: sessions
+        description: "Log bruto de sessões de login e jogo."
+        columns:
+          - name: session_id
+            description: "ID único da sessão."
+          - name: player_id
+            description: "ID do jogador associado."
+          - name: ip
+            description: "Endereço IP."
+          - name: device
+            description: "Dispositivo (desktop, mobile, etc)."
+          - name: timestamp
+            description: "Timestamp da sessão."
+          - name: _ingested_at
+            description: "Timestamp de ingestão."
+
+      - name: transactions
+        description: "Ledger financeiro bruto de depósitos, saques e apostas."
+        columns:
+          - name: transaction_id
+            description: "ID único da transação."
+          - name: player_id
+            description: "ID do jogador."
+          - name: type
+            description: "Tipo (deposit, withdraw, bet)."
+          - name: amount
+            description: "Valor monetário."
+          - name: timestamp
+            description: "Timestamp da transação."
+          - name: _ingested_at
+            description: "Timestamp de ingestão."

@@ -1,0 +1,20 @@
+name: domain_analytics
+version: "1.0.0"
+config-version: 2
+profile: databricks_platform
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+models:
+  domain_analytics:
+    bronze:
+      +schema: analytics_bronze
+      +materialized: view
+    silver:
+      +schema: analytics_silver
+      +materialized: table
+    gold:
+      +schema: analytics_gold
+      +materialized: table

@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_affiliate_cpa_ftd
+    description: "Staging view for affiliate conversions with typed timestamps and numeric amounts."
+    columns:
+      - name: affiliate_id
+        description: "Affiliate identification."
+        tests:
+          - not_null
+      - name: player_id
+        description: "Primary key referencing the player."
+        tests:
+          - not_null
+      - name: cpa_qualified
+        description: "Boolean flag indicating if player qualified for CPA commission."
+      - name: cpa_value
+        description: "CPA commission monetary amount."
+      - name: ftd
+        description: "First time deposit count/flag."
+
+  - name: stg_players
+    description: "Staging view for player identity profiles."
+    columns:
+      - name: player_id
+        description: "Unique player key."
+        tests:
+          - not_null
+      - name: email
+        description: "Player email in lowercase."
+      - name: city
+        description: "Player city."
+
+  - name: stg_sessions
+    description: "Staging view for user session activity."
+    columns:
+      - name: session_id
+        description: "Unique session key."
+        tests:
+          - not_null
+      - name: player_id
+        description: "Player key."
+        tests:
+          - not_null
+
+  - name: stg_transactions
+    description: "Staging view for financial transactions."
+    columns:
+      - name: transaction_id
+        description: "Unique transaction identifier."
+        tests:
+          - not_null
+      - name: player_id
+        description: "Player key."
+        tests:
+          - not_null
+      - name: amount
+        description: "Monetary transaction value."
+

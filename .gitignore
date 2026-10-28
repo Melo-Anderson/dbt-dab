@@ -1,0 +1,13 @@
+# dbt
+target/
+dbt_packages/
+logs/
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Databricks
+.databricks/
+# Secrets
+.env
+*.pem

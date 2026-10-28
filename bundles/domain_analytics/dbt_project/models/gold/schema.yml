@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: dim_players
+    description: "Gold dimensional player model enriched with session, geolocation, and affiliate attribution."
+    columns:
+      - name: player_sk
+        description: "Surrogate key for player dimension."
+        tests:
+          - unique
+          - not_null
+      - name: player_id
+        description: "Natural player identification key."
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_affiliates
+    description: "Gold dimensional affiliate model with partner-level conversion rates and totals."
+    columns:
+      - name: affiliate_sk
+        description: "Surrogate key for affiliate dimension."
+        tests:
+          - unique
+          - not_null
+      - name: affiliate_id
+        description: "Natural affiliate identification key."
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_transactions
+    description: "Gold fact model for financial transactions with surrogate key references."
+    columns:
+      - name: transaction_sk
+        description: "Surrogate key for transactions fact."
+        tests:
+          - unique
+          - not_null
+      - name: transaction_id
+        description: "Natural transaction ID."
+        tests:
+          - unique
+          - not_null
+      - name: player_id
+        description: "Player natural key."
+        tests:
+          - not_null
+
+  - name: fct_affiliate_performance
+    description: "Gold fact model aggregating daily campaign CPA, FTD, and conversion performance."
+    columns:
+      - name: performance_sk
+        description: "Surrogate key for daily affiliate performance fact."
+        tests:
+          - unique
+          - not_null
+      - name: affiliate_id
+        description: "Affiliate key."
+        tests:
+          - not_null
+
+  - name: fct_player_risk_profile
+    description: "Gold fact model summarizing player financial volume, rollover multiplier, and risk tier."
+    columns:
+      - name: player_sk
+        description: "Surrogate key for player risk profile."
+        tests:
+          - unique
+          - not_null
+      - name: player_id
+        description: "Player identification key."
+        tests:
+          - unique
+          - not_null
+
+  - name: gold_fraud_alerts
+    description: "Gold security model flagging multi-accounting CPA farming, rollover abuse, and geo mismatch."
+    columns:
+      - name: alert_id
+        description: "Surrogate alert identifier."
+        tests:
+          - unique
+          - not_null
+      - name: alert_type
+        description: "Category of detected fraud."
+        tests:
+          - not_null
+      - name: severity
+        description: "Alert severity (CRITICAL, HIGH, MEDIUM, LOW)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']

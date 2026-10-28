@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: slv_affiliate_cpa_ftd
+    description: "Conformed Silver incremental model for affiliate conversions."
+    columns:
+      - name: affiliate_id
+        description: "Affiliate identification."
+        tests:
+          - not_null
+      - name: player_id
+        description: "Player natural identifier."
+        tests:
+          - unique
+          - not_null
+      - name: cpa_qualified
+        description: "CPA qualification flag."
+
+  - name: slv_players
+    description: "Conformed Silver incremental model for player accounts."
+    columns:
+      - name: player_id
+        description: "Player identification primary key."
+        tests:
+          - unique
+          - not_null
+      - name: email
+        description: "Player email."
+
+  - name: slv_sessions
+    description: "Conformed Silver incremental model for sessions."
+    columns:
+      - name: session_id
+        description: "Session primary key."
+        tests:
+          - unique
+          - not_null
+      - name: player_id
+        description: "Player natural identifier."
+        tests:
+          - not_null
+
+  - name: slv_transactions
+    description: "Conformed Silver incremental model for transactions."
+    columns:
+      - name: transaction_id
+        description: "Primary key."
+        tests:
+          - unique
+          - not_null
+      - name: player_id
+        description: "Player ID."
+        tests:
+          - not_null
+      - name: transaction_timestamp
+        description: "Transaction execution timestamp."
+        tests:
+          - not_null
