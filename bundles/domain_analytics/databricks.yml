@@ -1,0 +1,77 @@
+# Declarative Automation Bundle: domain_analytics
+bundle:
+  name: domain_analytics
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Catálogo do ambiente
+  warehouse_id:
+    description: ID do SQL Warehouse usado pela dbt task
+  sp_run:
+    description: Application ID do service principal de execução (hml/prod)
+    default: ""
+  sp_deploy:
+    description: Application ID do service principal de deploy (hml/prod)
+    default: ""
+
+workspace:
+  host: https://dbc-a5826b21-de5f.cloud.databricks.com
+
+targets:
+  dev:
+    mode: development
+    default: true
+    variables:
+      catalog: dev
+      warehouse_id: "2fe46b2cf5211009"
+
+
+  hml:
+    mode: production
+    presets:
+      name_prefix: "[hml] "
+      trigger_pause_status: PAUSED
+    workspace:
+      root_path: /Workspace/Homologacao/.bundle/${bundle.name}
+    variables:
+      catalog: hml
+      warehouse_id: "2fe46b2cf5211009"
+      sp_run: "d9648ac4-8e0d-48ea-800c-1c8aa9aff05c"
+      sp_deploy: "5645a876-1b7a-4ffe-b25a-7f02cd9e6297"
+    run_as:
+      service_principal_name: "d9648ac4-8e0d-48ea-800c-1c8aa9aff05c"
+    permissions:
+      - service_principal_name: "5645a876-1b7a-4ffe-b25a-7f02cd9e6297"
+        level: CAN_MANAGE
+      - service_principal_name: "d9648ac4-8e0d-48ea-800c-1c8aa9aff05c"
+        level: CAN_VIEW
+      - group_name: users
+        level: CAN_VIEW
+
+
+  prod:
+    mode: production
+    git:
+      branch: main
+    presets:
+      name_prefix: "[prd] "
+      trigger_pause_status: PAUSED
+    workspace:
+      root_path: /Workspace/Production/.bundle/${bundle.name}
+    variables:
+      catalog: prod
+      warehouse_id: "2fe46b2cf5211009"
+      sp_run: "d5b202ca-ce78-492c-936c-3ae162c981ab"
+      sp_deploy: "27a87926-db11-414a-84a7-bc6b3ff1d924"
+    run_as:
+      service_principal_name: "d5b202ca-ce78-492c-936c-3ae162c981ab"
+    permissions:
+      - service_principal_name: "27a87926-db11-414a-84a7-bc6b3ff1d924"
+        level: CAN_MANAGE
+      - service_principal_name: "d5b202ca-ce78-492c-936c-3ae162c981ab"
+        level: CAN_VIEW
+      - group_name: users
+        level: CAN_VIEW

@@ -1,0 +1,11 @@
+resources:
+  schemas:
+    analytics_bronze:
+      catalog_name: ${var.catalog}
+      name: analytics_bronze
+    analytics_silver:
+      catalog_name: ${var.catalog}
+      name: analytics_silver
+    analytics_gold:
+      catalog_name: ${var.catalog}
+      name: analytics_gold
